@@ -409,3 +409,87 @@ def news_feed(request):
         NewsCache.objects.create(cache_key=cache_key, data=payload)
 
     return Response(payload)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def news_search(request):
+    """
+    GET /api/news/search/?q={query}
+
+    Proxies NewsAPI /everything with a free-text query.
+    Results are NOT cached (search is ad-hoc).
+    Returns up to 9 clean articles:
+      { title, description, url, image_url, source, published_at }
+    """
+    query = request.query_params.get('q', '').strip()
+    if not query:
+        return Response(
+            {'detail': 'Query parameter "q" is required.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    if not settings.NEWS_API_KEY:
+        return Response(
+            {'detail': 'News service is not configured.'},
+            status=status.HTTP_503_SERVICE_UNAVAILABLE,
+        )
+
+    try:
+        news_resp = requests.get(
+            f'{NEWSAPI_BASE}/everything',
+            params={
+                'apiKey':   settings.NEWS_API_KEY,
+                'q':        query,
+                'language': 'en',
+                'sortBy':   'publishedAt',
+                'pageSize': 9,
+            },
+            timeout=8,
+        )
+    except requests.RequestException as exc:
+        logger.error('NewsAPI search request failed: %s', exc)
+        return Response(
+            {'detail': 'Could not reach the news service. Please try again later.'},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if news_resp.status_code == 401:
+        return Response(
+            {'detail': 'News service authentication failed.'},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    if news_resp.status_code == 429:
+        return Response(
+            {'detail': 'News rate limit exceeded. Please try again later.'},
+            status=status.HTTP_429_TOO_MANY_REQUESTS,
+        )
+
+    if news_resp.status_code != 200:
+        logger.error('NewsAPI search returned %s: %s', news_resp.status_code, news_resp.text)
+        return Response(
+            {'detail': 'News search unavailable. Please try again later.'},
+            status=status.HTTP_502_BAD_GATEWAY,
+        )
+
+    raw      = news_resp.json()
+    articles = raw.get('articles', [])
+
+    payload = [
+        {
+            'title':        (a.get('title') or '').strip(),
+            'description':  (a.get('description') or '').strip(),
+            'url':          a.get('url', ''),
+            'image_url':    a.get('urlToImage') or '',
+            'source':       (a.get('source') or {}).get('name', 'Unknown'),
+            'published_at': a.get('publishedAt', ''),
+        }
+        for a in articles
+        if (a.get('title') or '').strip()
+        and a.get('url')
+        and '[Removed]' not in (a.get('title') or '')
+    ][:9]
+
+    return Response(payload)
+

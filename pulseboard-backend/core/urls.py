@@ -19,4 +19,5 @@ urlpatterns = [
 
     # ── News ──────────────────────────────────────────────────────────────────
     path('news/', views.news_feed, name='news-feed'),
+    path('news/search/', views.news_search, name='news-search'),
 ]

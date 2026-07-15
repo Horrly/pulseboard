@@ -28,7 +28,11 @@ export default function Dashboard() {
   const navigate   = useNavigate();
 
   const { weather, forecast, loading: weatherLoading, error: weatherError, searchCity } = useWeather();
-  const { articles, loading: newsLoading, error: newsError, category, changeCategory, CATEGORIES } = useNews('general', 'ng');
+  const {
+    articles, loading: newsLoading, error: newsError,
+    category, changeCategory, CATEGORIES,
+    searchQuery, searchNews, clearSearch, isSearchMode,
+  } = useNews('general', 'ng');
 
   // Auto-load user's default city on mount
   useEffect(() => {
@@ -80,7 +84,7 @@ export default function Dashboard() {
             Good to see you, {user?.first_name || 'there'} 👋
           </h1>
           <p className="mt-1 text-slate-500 dark:text-slate-400">
-            Live weather, 5-day forecast, and top headlines — all in one place.
+          Live weather, 5-day forecast, and top Nigerian headlines — all in one place.
           </p>
         </section>
 
@@ -126,7 +130,7 @@ export default function Dashboard() {
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-3">
                 🌍 Weather Search
               </p>
-              <WeatherSearch onSearch={searchCity} loading={weatherLoading} />
+              <WeatherSearch onSearch={searchCity} loading={weatherLoading} isDark={isDark} />
             </div>
 
             {weatherLoading && (
@@ -252,6 +256,10 @@ export default function Dashboard() {
             category={category}
             categories={CATEGORIES}
             onCategoryChange={changeCategory}
+            searchQuery={searchQuery}
+            onSearch={searchNews}
+            onClearSearch={clearSearch}
+            isSearchMode={isSearchMode}
             isDark={isDark}
           />
         </section>

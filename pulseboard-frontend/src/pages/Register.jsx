@@ -15,6 +15,16 @@ const NEWS_CATS = [
   { id: 'general', label: '🌐 General' },
 ];
 
+/** All 36 Nigerian states + FCT Abuja, sorted alphabetically */
+const NIGERIAN_STATES = [
+  'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa',
+  'Benue', 'Borno', 'Cross River', 'Delta', 'Ebonyi', 'Edo',
+  'Ekiti', 'Enugu', 'FCT Abuja', 'Gombe', 'Imo', 'Jigawa',
+  'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara',
+  'Lagos', 'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun',
+  'Oyo', 'Plateau', 'Rivers', 'Sokoto', 'Taraba', 'Yobe', 'Zamfara',
+];
+
 export default function Register() {
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -24,7 +34,7 @@ export default function Register() {
     email: '', password: '', first_name: '', last_name: '',
     preferred_unit: 'C',
     preferred_news_categories: ['technology', 'general'],
-    default_city: 'London',
+    default_city: 'Lagos',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -62,7 +72,7 @@ export default function Register() {
       await api.patch('/auth/preferences/', {
         preferred_unit: form.preferred_unit,
         preferred_news_categories: form.preferred_news_categories,
-        default_city: form.default_city.trim() || 'London',
+        default_city: form.default_city || 'Lagos',
       });
       navigate('/dashboard');
     } catch (err) {
@@ -217,17 +227,59 @@ export default function Register() {
                     </div>
                   </div>
 
-                  {/* Default city */}
+                  {/* Default Nigerian state */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Default city</label>
-                    <input
-                      id="reg-city"
-                      type="text"
-                      value={form.default_city}
-                      onChange={set('default_city')}
-                      placeholder="London"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
-                    />
+                    <label htmlFor="reg-city" className="block text-sm font-medium text-slate-300 mb-1.5">
+                      📍 Your state (Nigeria)
+                    </label>
+                    <div style={{ position: 'relative' }}>
+                      <select
+                        id="reg-city"
+                        value={form.default_city}
+                        onChange={set('default_city')}
+                        style={{
+                          width: '100%',
+                          borderRadius: '0.75rem',
+                          border: '1px solid rgba(255,255,255,0.10)',
+                          background: 'rgba(255,255,255,0.05)',
+                          color: '#f1f5f9',
+                          padding: '0.625rem 2.5rem 0.625rem 1rem',
+                          fontSize: '0.875rem',
+                          outline: 'none',
+                          appearance: 'none',
+                          WebkitAppearance: 'none',
+                          cursor: 'pointer',
+                          transition: 'border-color 0.2s, box-shadow 0.2s',
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.borderColor = '#6366f1';
+                          e.target.style.boxShadow = '0 0 0 3px rgba(99,102,241,0.2)';
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.borderColor = 'rgba(255,255,255,0.10)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      >
+                        {NIGERIAN_STATES.map((state) => (
+                          <option
+                            key={state}
+                            value={state}
+                            style={{ background: '#1e293b', color: '#f1f5f9' }}
+                          >
+                            {state}
+                          </option>
+                        ))}
+                      </select>
+                      {/* Chevron icon */}
+                      <span style={{
+                        position: 'absolute', right: '0.875rem', top: '50%',
+                        transform: 'translateY(-50%)', pointerEvents: 'none',
+                        color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem',
+                      }}>▼</span>
+                    </div>
+                    <p style={{ marginTop: '0.4rem', fontSize: '0.7rem', color: 'rgba(255,255,255,0.35)' }}>
+                      Used to pre-load weather and localised news for your state.
+                    </p>
                   </div>
 
                   {/* News categories */}
