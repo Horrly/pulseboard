@@ -1,0 +1,32 @@
+# ===== BACKEND =====
+pulseboard-backend/venv/
+pulseboard-backend/__pycache__/
+pulseboard-backend/**/__pycache__/
+pulseboard-backend/*.pyc
+pulseboard-backend/.env
+pulseboard-backend/db.sqlite3
+pulseboard-backend/.pytest_cache/
+pulseboard-backend/**/.pytest_cache/
+
+# ===== FRONTEND =====
+pulseboard-frontend/node_modules/
+pulseboard-frontend/dist/
+pulseboard-frontend/dist-ssr/
+pulseboard-frontend/*.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
